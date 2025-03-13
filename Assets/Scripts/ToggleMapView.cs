@@ -6,13 +6,13 @@ public class ToggleMapView : MonoBehaviour
     public GameObject starMapCanvas;   // Assign Star Map Canvas
     public KeyCode toggleKey = KeyCode.M; // Press 'M' to toggle
 
-    private bool showingSystemMap = true;
+    private bool showingSystemMap = false;
 
     void Start()
     {
-        // Ensure only one map is active at the start
-        systemMapCanvas.SetActive(true);
-        starMapCanvas.SetActive(false);
+        // Show star map by default
+        systemMapCanvas.SetActive(false);
+        starMapCanvas.SetActive(true);
     }
 
     void Update()

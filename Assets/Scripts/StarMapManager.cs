@@ -21,6 +21,7 @@ public class StarMapManager : MonoBehaviour
 
     // Origin point for the star map
     private Vector3 mapOrigin = new Vector3(2000f, 2000f, 2000f);
+    private string logsPath;
 
     [System.Serializable]
     public class StarSystem
@@ -68,6 +69,12 @@ public class StarMapManager : MonoBehaviour
     void Start()
     {
         Debug.Log("StarMapManager started.");
+        // Create GameLogs directory if it doesn't exist
+        logsPath = Path.Combine(Application.dataPath, "..", "GameLogs");
+        if (!Directory.Exists(logsPath))
+        {
+            Directory.CreateDirectory(logsPath);
+        }
         LoadStarData();
         GenerateStarSystems();
         SaveStarSystemsToJson();
@@ -180,7 +187,7 @@ public class StarMapManager : MonoBehaviour
     void SummarizeStarSystems()
     {
         string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-        string filePath = Path.Combine(Application.streamingAssetsPath, $"StarSystemsSummary_{timestamp}.txt");
+        string filePath = Path.Combine(logsPath, $"StarSystemsSummary_{timestamp}.txt");
 
         string summary = $"Total Systems: {starSystems.Count}\n";
         File.WriteAllText(filePath, summary);
@@ -205,7 +212,7 @@ public class StarMapManager : MonoBehaviour
     void SaveStarSystemsToJson()
     {
         string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-        string filePath = Path.Combine(Application.streamingAssetsPath, $"StarSystems_{timestamp}.json");
+        string filePath = Path.Combine(logsPath, $"StarSystems_{timestamp}.json");
 
         StarSystemList starSystemList = new StarSystemList { starSystems = this.starSystems };
 
@@ -217,7 +224,7 @@ public class StarMapManager : MonoBehaviour
     void SaveBinnedDistances()
     {
         string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-        string filePath = Path.Combine(Application.streamingAssetsPath, $"star_distance_bins_{timestamp}.txt");
+        string filePath = Path.Combine(logsPath, $"star_distance_bins_{timestamp}.txt");
 
         using (StreamWriter writer = new StreamWriter(filePath))
         {
