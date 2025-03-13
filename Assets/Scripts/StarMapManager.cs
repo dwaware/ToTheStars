@@ -7,7 +7,6 @@ using System.Linq;
 public class StarMapManager : MonoBehaviour
 {
     public GameObject starPrefab;
-    public GameObject escapeMenuPanel;
 
     private List<GameObject> stars = new List<GameObject>();
     private List<StarSystem> starSystems = new List<StarSystem>();
@@ -19,7 +18,6 @@ public class StarMapManager : MonoBehaviour
     private float sphereRadius = 995f;
     private float minSeparation = 220f;
     private float powerLawExponent = 2.0f;
-    private bool isEscapeMenuOpen = false;
 
     // Origin point for the star map
     private Vector3 mapOrigin = new Vector3(2000f, 2000f, 2000f);
@@ -75,21 +73,6 @@ public class StarMapManager : MonoBehaviour
         SaveStarSystemsToJson();
         SaveBinnedDistances();
         SummarizeStarSystems();
-    }
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            ToggleEscapeMenu();
-        }
-    }
-
-    void ToggleEscapeMenu()
-    {
-        isEscapeMenuOpen = !isEscapeMenuOpen;
-        escapeMenuPanel.SetActive(isEscapeMenuOpen);
-        Debug.Log($"Escape Menu is now {(isEscapeMenuOpen ? "OPEN" : "CLOSED")}");
     }
 
     void LoadStarData()
