@@ -199,7 +199,18 @@ public class StarMapManager : MonoBehaviour
         GameObject starObj = Instantiate(starPrefab, new Vector3(starSystem.x, starSystem.y, starSystem.z), Quaternion.identity);
         starObj.transform.localScale = new Vector3(25, 25, 25);
         starObj.name = starSystem.name;
-        starObj.GetComponent<Renderer>().material.color = starColor;
+        
+        var renderer = starObj.GetComponent<Renderer>();
+        var material = renderer.material;
+        
+        // Use the exact RGB value for base color
+        material.color = starColor;
+        
+        // Properly set up emission
+        material.EnableKeyword("_EMISSION");
+        material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
+        material.SetColor("_EmissionColor", starColor * 0.2f);
+        
         stars.Add(starObj);
     }
 
