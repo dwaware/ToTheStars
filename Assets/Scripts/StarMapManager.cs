@@ -19,7 +19,6 @@ public class StarMapManager : MonoBehaviour
     private float minSeparation = 220f;
     private float powerLawExponent = 2.0f;
 
-    // Origin point for the star map
     private Vector3 mapOrigin = new Vector3(2000f, 2000f, 2000f);
     private string logsPath;
 
@@ -68,13 +67,10 @@ public class StarMapManager : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("StarMapManager started.");
-        // Create GameLogs directory if it doesn't exist
+        Debug.Log("🔭 [StarMapManager] Starting...");
         logsPath = Path.Combine(Application.dataPath, "..", "GameLogs");
-        if (!Directory.Exists(logsPath))
-        {
-            Directory.CreateDirectory(logsPath);
-        }
+        if (!Directory.Exists(logsPath)) Directory.CreateDirectory(logsPath);
+
         LoadStarData();
         GenerateStarSystems();
         SaveStarSystemsToJson();
@@ -88,15 +84,13 @@ public class StarMapManager : MonoBehaviour
         string json = File.ReadAllText(filePath);
         StarDataList starDataList = JsonUtility.FromJson<StarDataList>(json);
 
-        Debug.Log($"Loaded {starDataList.stars.Count} stars from file.");
+        Debug.Log($"📄 Loaded {starDataList.stars.Count} stars from file.");
 
         float totalFrequency = starDataList.stars.Sum(s => s.Frequency);
-        Debug.Log($"Total Frequency from JSON: {totalFrequency}%");
+        Debug.Log($"📊 Total Frequency from JSON: {totalFrequency}%");
 
         if (Mathf.Abs(totalFrequency - 100.00f) > 0.01f)
-        {
-            Debug.LogWarning("WARNING: Total frequency does not sum to 100%! Check JSON data.");
-        }
+            Debug.LogWarning("⚠️ WARNING: Total frequency does not sum to 100%! Check JSON data.");
 
         PrecomputeCumulativeDistribution(starDataList.stars);
     }
@@ -115,7 +109,7 @@ public class StarMapManager : MonoBehaviour
             cumulativeFrequencies.Add(cumulativeSum);
         }
 
-        Debug.Log("CDF table created for fast weighted selection.");
+        Debug.Log("✅ CDF table created for fast weighted selection.");
     }
 
     StarData GetRandomWeightedStar()
@@ -123,8 +117,7 @@ public class StarMapManager : MonoBehaviour
         float randomValue = UnityEngine.Random.Range(0f, 100f);
         int index = cumulativeFrequencies.BinarySearch(randomValue);
 
-        if (index < 0)
-            index = ~index;
+        if (index < 0) index = ~index;
 
         return sortedStarData[Mathf.Clamp(index, 0, sortedStarData.Count - 1)];
     }
@@ -133,14 +126,13 @@ public class StarMapManager : MonoBehaviour
     {
         if (sortedStarData.Count == 0)
         {
-            Debug.LogError("No star data available! Cannot generate star systems.");
+            Debug.LogError("❌ No star data available! Cannot generate star systems.");
             return;
         }
 
         starSystems.Clear();
         starPositions.Clear();
 
-        // Create Sol at the map origin
         StarSystem sol = new StarSystem("[0] Sol", mapOrigin.x, mapOrigin.y, mapOrigin.z);
         starSystems.Add(sol);
         starPositions.Add(mapOrigin);
@@ -159,58 +151,57 @@ public class StarMapManager : MonoBehaviour
                           (Mathf.Pow(sphereRadius, 1 - powerLawExponent) - Mathf.Pow(minSeparation, 1 - powerLawExponent)) * UnityEngine.Random.value;
                 r = Mathf.Pow(r, 1 / (1 - powerLawExponent));
 
-                // Generate position relative to map origin
                 position = mapOrigin + UnityEngine.Random.onUnitSphere * r;
-
                 validPosition = starPositions.All(existing => Vector3.Distance(existing, position) >= minSeparation);
-
                 attempts++;
-
-            } while (!validPosition && attempts < 1000);
+            }
+            while (!validPosition && attempts < 1000);
 
             if (!validPosition) continue;
 
             starPositions.Add(position);
 
             StarData starData = GetRandomWeightedStar();
-
             string starName = $"[{i}] {starData.StellarClass}{starData.Subclass}({starData.LuminosityClass})";
             StarSystem newStarSystem = new StarSystem(starName, position.x, position.y, position.z);
             starSystems.Add(newStarSystem);
 
             CreateStarGameObject(newStarSystem, ParseColorFromRGB(starData.RGB));
         }
-
-        SaveStarSystemsToJson();
-    }
-
-    void SummarizeStarSystems()
-    {
-        string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-        string filePath = Path.Combine(logsPath, $"StarSystemsSummary_{timestamp}.txt");
-
-        string summary = $"Total Systems: {starSystems.Count}\n";
-        File.WriteAllText(filePath, summary);
-        Debug.Log($"Summary saved to: {filePath}");
     }
 
     void CreateStarGameObject(StarSystem starSystem, Color starColor)
     {
         GameObject starObj = Instantiate(starPrefab, new Vector3(starSystem.x, starSystem.y, starSystem.z), Quaternion.identity);
-        starObj.transform.localScale = new Vector3(25, 25, 25);
         starObj.name = starSystem.name;
-        
+
+        starObj.transform.localScale = new Vector3(25, 25, 25);
+
+        int starMapLayer = LayerMask.NameToLayer("StarMap");
+        starObj.layer = starMapLayer;
+        foreach (Transform t in starObj.GetComponentsInChildren<Transform>())
+            t.gameObject.layer = starMapLayer;
+
+        SphereCollider sc = starObj.GetComponent<SphereCollider>();
+        if (sc != null)
+        {
+            sc.radius = 0.5f; // back to normalized
+            sc.isTrigger = false;
+            Debug.Log($"🛠️ Created star: {starSystem.name}, Pos: {starObj.transform.position}, Scale: {starObj.transform.localScale}, Collider Radius: {sc.radius}, Layer: {starObj.layer}");
+        }
+        else
+        {
+            Debug.LogWarning($"⚠️ No SphereCollider found on star prefab: {starSystem.name}");
+        }
+
         var renderer = starObj.GetComponent<Renderer>();
         var material = renderer.material;
-        
-        // Use the exact RGB value for base color
+
         material.color = starColor;
-        
-        // Properly set up emission
         material.EnableKeyword("_EMISSION");
         material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
         material.SetColor("_EmissionColor", starColor * 0.2f);
-        
+
         stars.Add(starObj);
     }
 
@@ -226,10 +217,9 @@ public class StarMapManager : MonoBehaviour
         string filePath = Path.Combine(logsPath, $"StarSystems_{timestamp}.json");
 
         StarSystemList starSystemList = new StarSystemList { starSystems = this.starSystems };
-
         string json = JsonUtility.ToJson(starSystemList, true);
         File.WriteAllText(filePath, json);
-        Debug.Log($"Star systems successfully saved to: {filePath}");
+        Debug.Log($"📁 Star systems saved to: {filePath}");
     }
 
     void SaveBinnedDistances()
@@ -246,28 +236,28 @@ public class StarMapManager : MonoBehaviour
             }
         }
 
-        Debug.Log($"Binned distance data saved: {filePath}");
+        Debug.Log($"📏 Binned distance data saved: {filePath}");
+    }
+
+    void SummarizeStarSystems()
+    {
+        string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+        string filePath = Path.Combine(logsPath, $"StarSystemsSummary_{timestamp}.txt");
+
+        string summary = $"Total Systems: {starSystems.Count}\n";
+        File.WriteAllText(filePath, summary);
+        Debug.Log($"🧾 Summary saved to: {filePath}");
     }
 
     public void ClearAndRegenerate()
     {
-        Debug.Log("Clearing existing stars and regenerating...");
-
-        // Destroy all star GameObjects in the scene
-        foreach (GameObject star in stars)
-        {
-            Destroy(star);
-        }
-        stars.Clear();  // Clear the list of GameObjects
-
-        // Clear stored star data
+        Debug.Log("♻️ Clearing and regenerating stars...");
+        foreach (GameObject star in stars) Destroy(star);
+        stars.Clear();
         starSystems.Clear();
         starPositions.Clear();
 
-        // Generate new star systems
         GenerateStarSystems();
-
-        // Save the new data
         SaveStarSystemsToJson();
         SaveBinnedDistances();
         SummarizeStarSystems();
@@ -275,11 +265,9 @@ public class StarMapManager : MonoBehaviour
 
     public void SummarizeCurrentSystems()
     {
-        Debug.Log("Summarizing existing data...");
-
-        // Save the data
+        Debug.Log("📋 Summarizing current systems...");
         SaveStarSystemsToJson();
         SaveBinnedDistances();
         SummarizeStarSystems();
     }
-} 
+}

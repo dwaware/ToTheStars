@@ -676,7 +676,7 @@ GameObject:
   - component: {fileID: 609006932}
   - component: {fileID: 609006930}
   m_Layer: 0
-  m_Name: Camera
+  m_Name: SystemMap - Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1052,7 +1052,7 @@ GameObject:
   - component: {fileID: 830612912}
   - component: {fileID: 830612910}
   m_Layer: 0
-  m_Name: Camera
+  m_Name: StarMap - Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1784,6 +1784,7 @@ GameObject:
   - component: {fileID: 1912014037}
   - component: {fileID: 1912014041}
   - component: {fileID: 1912014042}
+  - component: {fileID: 1912014043}
   m_Layer: 5
   m_Name: Canvas - StarMap
   m_TagString: Untagged
@@ -1902,6 +1903,21 @@ MonoBehaviour:
   rotationSpeed: 0.5
   maxVerticalAngle: 80
   cameraTransform: {fileID: 0}
+--- !u!114 &1912014043
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1912014036}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0be907c6ab866ed49ad40968281f7ca9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  starMapCamera: {fileID: 830612912}
+  starMapRawImage: {fileID: 112054443}
+  debugRayDuration: 30
 --- !u!1 &1968774604
 GameObject:
   m_ObjectHideFlags: 0
