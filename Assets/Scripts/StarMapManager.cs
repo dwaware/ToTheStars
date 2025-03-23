@@ -6,7 +6,9 @@ using System.Linq;
 
 public class StarMapManager : MonoBehaviour
 {
-    public GameObject starPrefab;
+    [Header("Prefabs")]
+    [SerializeField] private GameObject starPrefab;
+    [SerializeField] private GameObject galacticPlanePrefab;
 
     private List<GameObject> stars = new List<GameObject>();
     private List<StarSystem> starSystems = new List<StarSystem>();
@@ -65,8 +67,83 @@ public class StarMapManager : MonoBehaviour
         public List<StarData> stars;
     }
 
+    private Mesh CreateHighResolutionCylinderMesh(int segments)
+    {
+        Mesh mesh = new Mesh();
+        
+        // Calculate vertices
+        List<Vector3> vertices = new List<Vector3>();
+        List<int> triangles = new List<int>();
+        
+        // Add center vertices (top and bottom)
+        vertices.Add(Vector3.up * 0.5f);   // Top center
+        vertices.Add(Vector3.down * 0.5f); // Bottom center
+        
+        // Add perimeter vertices
+        for (int i = 0; i < segments; i++)
+        {
+            float angle = i * Mathf.PI * 2f / segments;
+            float x = Mathf.Cos(angle);
+            float z = Mathf.Sin(angle);
+            
+            // Top perimeter
+            vertices.Add(new Vector3(x, 0.5f, z));
+            // Bottom perimeter
+            vertices.Add(new Vector3(x, -0.5f, z));
+        }
+        
+        // Create triangles
+        for (int i = 0; i < segments; i++)
+        {
+            int current = 2 + i * 2;
+            int next = 2 + ((i + 1) % segments) * 2;
+            
+            // Top cap
+            triangles.Add(0);
+            triangles.Add(current);
+            triangles.Add(next);
+            
+            // Bottom cap
+            triangles.Add(1);
+            triangles.Add(next + 1);
+            triangles.Add(current + 1);
+            
+            // Side quad (as two triangles)
+            triangles.Add(current);
+            triangles.Add(current + 1);
+            triangles.Add(next);
+            
+            triangles.Add(next);
+            triangles.Add(current + 1);
+            triangles.Add(next + 1);
+        }
+        
+        mesh.vertices = vertices.ToArray();
+        mesh.triangles = triangles.ToArray();
+        mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
+        
+        return mesh;
+    }
+
     void Start()
     {
+        if (!starPrefab) Debug.LogError("[StarMapManager] No Star Prefab assigned!");
+        if (!galacticPlanePrefab) Debug.LogError("[StarMapManager] No Galactic Plane Prefab assigned!");
+        
+        mapOrigin = new Vector3(2000f, 2000f, 2000f);
+        
+        // Create the galactic plane with high resolution mesh
+        GameObject galacticPlane = Instantiate(galacticPlanePrefab, mapOrigin, Quaternion.identity);
+        galacticPlane.name = "Galactic Plane";
+        
+        // Replace the default cylinder mesh with our high resolution one
+        MeshFilter meshFilter = galacticPlane.GetComponent<MeshFilter>();
+        if (meshFilter != null)
+        {
+            meshFilter.mesh = CreateHighResolutionCylinderMesh(72); // 72 segments for smooth circle
+        }
+        
         Debug.Log("🔭 [StarMapManager] Starting...");
         logsPath = Path.Combine(Application.dataPath, "..", "GameLogs");
         if (!Directory.Exists(logsPath)) Directory.CreateDirectory(logsPath);
