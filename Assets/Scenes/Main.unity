@@ -632,7 +632,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 553b4cd65f279a74bad79d4c11b996ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  escapeMenu: {fileID: 1185213705}
+  escapeMenu: {fileID: 0}
 --- !u!1 &609006928
 GameObject:
   m_ObjectHideFlags: 0
@@ -1648,19 +1648,6 @@ RectTransform:
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &1185213705
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1185213700}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 34cf7c87bff437a4abae5471d8155d6e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  escapeMenuPanel: {fileID: 846328275}
---- !u!114 &1185213706
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
