@@ -1557,7 +1557,6 @@ GameObject:
   - component: {fileID: 1185213702}
   - component: {fileID: 1185213701}
   - component: {fileID: 1185213705}
-  - component: {fileID: 1185213706}
   m_Layer: 5
   m_Name: Canvas - Esc Menu
   m_TagString: Untagged
