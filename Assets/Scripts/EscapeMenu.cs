@@ -1,24 +1,26 @@
 using UnityEngine;
-using UnityEngine.UI;
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
 public class EscapeMenu : MonoBehaviour
 {
-    public GameObject escapeMenuPanel;
+    [SerializeField]
+    private GameObject escapeMenuPanel;
+    
     private bool isMenuOpen = false;
 
-    void Start()
+    public static event System.Action OnQuitRequested;
+
+    void Awake()
     {
-        // Ensure the menu is closed at start
         if (escapeMenuPanel != null)
         {
             escapeMenuPanel.SetActive(false);
         }
         else
         {
-            Debug.LogError("Escape menu panel reference is null! Please assign it in the Inspector.");
+            Debug.LogError("Escape menu panel not assigned! Please assign it in the Inspector.");
         }
     }
 
@@ -30,25 +32,22 @@ public class EscapeMenu : MonoBehaviour
         }
     }
 
-    public void ToggleMenu()
+    void ToggleMenu()
     {
-        isMenuOpen = !isMenuOpen;
         if (escapeMenuPanel != null)
         {
+            isMenuOpen = !isMenuOpen;
             escapeMenuPanel.SetActive(isMenuOpen);
         }
         else
         {
-            Debug.LogError("Cannot toggle menu - panel reference is null!");
+            Debug.LogError("Cannot toggle menu - panel reference is missing!");
         }
     }
 
-    public void QuitGame()
+    public void RequestQuit()
     {
-        #if UNITY_EDITOR
-            EditorApplication.isPlaying = false;
-        #else
-            Application.Quit();
-        #endif
+        Debug.Log("Quit requested");
+        OnQuitRequested?.Invoke();
     }
 } 
