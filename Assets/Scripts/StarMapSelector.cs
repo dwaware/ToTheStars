@@ -33,6 +33,12 @@ public class StarMapSelector : MonoBehaviour, IPointerClickHandler
                 selectionIndicator.gameObject.SetActive(false);
             }
             lastSelectedStar = null;
+            
+            // Hide the path visualization
+            if (StarPathVisualizer.Instance != null)
+            {
+                StarPathVisualizer.Instance.SetPathVisibility(false);
+            }
         }
     }
 
@@ -47,6 +53,13 @@ public class StarMapSelector : MonoBehaviour, IPointerClickHandler
         {
             selectionIndicator.gameObject.SetActive(true);
             lastSelectedStar = star;
+            
+            // Update path visualization for the selected star if visualizer exists
+            var visualizer = StarPathVisualizer.Instance;
+            if (visualizer != null)
+            {
+                visualizer.UpdatePathForStar(star.transform.position);
+            }
         }
     }
 

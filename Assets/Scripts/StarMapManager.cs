@@ -144,6 +144,12 @@ public class StarMapManager : MonoBehaviour
             meshFilter.mesh = CreateHighResolutionCylinderMesh(72); // 72 segments for smooth circle
         }
         
+        // Create path visualizer
+        GameObject pathVisualizerObj = new GameObject("StarPathVisualizer");
+        pathVisualizerObj.transform.position = mapOrigin; // Set it at the map origin
+        pathVisualizerObj.layer = LayerMask.NameToLayer("StarMap"); // Put it in the StarMap layer
+        pathVisualizerObj.AddComponent<StarPathVisualizer>();
+        
         Debug.Log("🔭 [StarMapManager] Starting...");
         logsPath = Path.Combine(Application.dataPath, "..", "GameLogs");
         if (!Directory.Exists(logsPath)) Directory.CreateDirectory(logsPath);
@@ -278,6 +284,9 @@ public class StarMapManager : MonoBehaviour
         material.EnableKeyword("_EMISSION");
         material.globalIlluminationFlags = MaterialGlobalIlluminationFlags.RealtimeEmissive;
         material.SetColor("_EmissionColor", starColor * 0.2f);
+
+        // Add the EclipticLine component
+        starObj.AddComponent<EclipticLine>();
 
         stars.Add(starObj);
     }
